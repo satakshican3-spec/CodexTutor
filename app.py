@@ -55,7 +55,7 @@ if prompt := st.chat_input(f"Ask your {subject_choice} question..."):
     with st.chat_message("user"):
         st.write(prompt)
 
-    response_text = get_tutor_response(prompt)
+    response_text = get_tutor_response(prompt, subject)
 
     with st.chat_message("assistant"):
         st.write(response_text)
@@ -63,7 +63,10 @@ if prompt := st.chat_input(f"Ask your {subject_choice} question..."):
 
 if hint_requested and st.session_state.messages:
     last_user_msg = next((m["content"] for m in reversed(st.session_state.messages) if m["role"] == "user"), None)
+
+    if last_user_msg: 
+
+    hint_text = get_tutor_response(last_user_msg, subject, is_hint=True)
     with st.chat_message("assistant"):
         st.info(f"HINT: {hint_text}")
         st.session_state.messages.append({"role": "assistant", "content": f"HINT: {hint_text}"})
-
