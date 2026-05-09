@@ -66,7 +66,7 @@ if hint_requested and st.session_state.messages:
 
     if last_user_msg: 
 
-    hint_text = get_tutor_response(last_user_msg, subject, is_hint=True)
-    with st.chat_message("assistant"):
-        st.info(f"HINT: {hint_text}")
-        st.session_state.messages.append({"role": "assistant", "content": f"HINT: {hint_text}"})
+        hint_text = get_tutor_response(last_user_msg, subject, is_hint=True)
+        with st.chat_message("assistant"):
+            st.info(f"HINT: {hint_text}")
+            st.session_state.messages.append({"role": "assistant", "content": f"HINT: {hint_text}"})
