@@ -35,14 +35,14 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.write(message["content"])
 
-def get_tutor_response(user_input, is_hint=False):
+def get_tutor_response(user_input, current_subject, is_hint=False):
     if model is None:
         return "AI is not connected. Please check your API key."
 
     if is_hint:
-        instruction = f"The student is stuck on this {subject} problem: '{user_input}'. Give a tiny, helpful hint to nudge them forward, but DO NOT give the answer."
+        instruction = f"The student is stuck on this {current_subject} problem: '{user_input}'. Give a tiny, helpful hint to nudge them forward, but DO NOT give the answer."
     else:
-        instruction = f"You are CodexTutor, a Socratic {subject} tutor. The student says: '{user_input}'. DO NOT give the solution. Ask One guiding question to help them find it."
+        instruction = f"You are CodexTutor, a Socratic {current_subject} tutor. The student says: '{user_input}'. DO NOT give the solution. Ask One guiding question to help them find it."
 
     try:
         response = model.generate_content(instruction)
