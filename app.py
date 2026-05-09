@@ -10,6 +10,25 @@ subject = st.sidebar.selectbox("Subject Focus", ["Math", "Science", "History", "
 st.sidebar.write("Stuck on a step?")
 hint_requested = st.sidebar.button("Get a Hint")
 
+st.sidebar.write("---")
+st.sidebar.subheader("System Status")
+
+If "GOOGLE_API_KEY" in st.secrets:
+    st.sidebar.success("AI Engine: Connected")
+    api_connected = True
+else:
+    st.sidebar.error("AI Engine: Disconnected")
+    api_connected = False
+
+with st.sidebar.expander("Setup Guide: How to connect"):
+    st.write("""
+    1. Visit [Google AI Studio](https://google.com).
+    2. Click 'Get API key' and copy your key.
+    3. In your Streamlit Dashboard, go to Settings > Secrets.
+    4. Paste your key exactly like this:
+       GOOGLE_API_KEY = "your-key-here"
+    """)
+
 st.title("CodexTutor: AI Socratic Coach")
 
 quotes = [
@@ -22,14 +41,12 @@ st.write("---")
 
 model = None
 
-if "GOOGLE_API_KEY" in st.secrets:
+if api_connected:
     try:
         genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
         model = genai.GenerativeModel('gemini-1.5-flash')
     except Exception as e:
-        st.error(f"AI Setup Error: {e}")
-else:
-    st.warning("Please add your 'GOOGLE_API_KEY' to streamlit Secrets to enable the AI.")
+        st.sidebar.error(f"API Error: {e}")
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -40,20 +57,20 @@ for message in st.session_state.messages:
 
 def get_tutor_response(user_input, is_hint=False):
     if model is None:
-        return "AI is not connected. Please check your API key."
+        return "The AI engine is currently disconnected. Please follow the setup guide in the sidebar."
 
     if is_hint:
-        instruction = f"The student is stuck on this {subject} problem: '{user_input}'. Give a small, helpful hint to nudge them forward, but DO NOT provide the answer."
+        instruction = f"The student is stuck on this {subject} problem: '{user_input}'. Provide a small, helpful hint to nudge them forward, but DO NOT reveal the final answer."
     else:
-        instruction = f"You are CodexTutor, a Socratic {subject} tutor. The student says: '{user_input}'. DO NOT provide the solution. Ask One guiding question to help them find it."
+        instruction = f"You are CodexTutor, a Socratic {subject} tutor. The student says: '{user_input}'. DO NOT Provide the solution. Ask one strategic question to help them find it."
 
     try:
         response = model.generate_content(instruction)
         return response.text
     except Exception as e:
-        return f"AI Error: {e}"
+        return f"System Error: {e}"
 
-if prompt := st.chat_input(f"Ask your {subject} question..."):
+if prompt := st.chat_input(f"Enter your {subject} question..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.write(prompt)
@@ -71,4 +88,4 @@ if hint_requested and st.session_state.messages:
         hint_text = get_tutor_response(last_user_msg, is_hint=True)
         with st.chat_message("assistant"):
             st.info(f"HINT: {hint_text}")
-            st.session_state.messages.append({"role": "assistant", "content": f"HINT: {hint_text}"})
+            st.session_state.messages.append({"role": "assistance", "content": f"HINT: {hint_text}"})
