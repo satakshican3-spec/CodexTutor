@@ -13,7 +13,7 @@ hint_requested = st.sidebar.button("Get a Hint")
 st.sidebar.write("---")
 st.sidebar.subheader("System Status")
 
-If "GOOGLE_API_KEY" in st.secrets:
+if "GOOGLE_API_KEY" in st.secrets:
     st.sidebar.success("AI Engine: Connected")
     api_connected = True
 else:
