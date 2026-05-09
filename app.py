@@ -35,7 +35,7 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.write(message["content"])
 
-def get_tutor_response(user[_input, is_hint=False):
+def get_tutor_response(user_input, is_hint=False):
     if model is None:
         return "AI is not connected. Please check your API key."
 
