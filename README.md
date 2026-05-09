@@ -35,4 +35,4 @@ The application is built on the Socratic Method, a form of cooperative dialogue 
 
 ---
 
-Launch the App Live: [codextutor-aitutor.streamlit.app]
+Launch the App Live: [codextutor-aitutor.streamlit.app](https://streamlit.app)
