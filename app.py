@@ -43,7 +43,7 @@ def get_tutor_response(user_input, is_hint=False):
         return "AI is not connected. Please check your API key."
 
     if is_hint:
-        instruction = f"The student is stuck on this {subject} problem: "{user_input}. Give a small, helpful hint to nudge them forward, but DO NOT provide the answer."
+        instruction = f"The student is stuck on this {subject} problem: '{user_input}'. Give a small, helpful hint to nudge them forward, but DO NOT provide the answer."
     else:
         instruction = f"You are CodexTutor, a Socratic {subject} tutor. The student says: '{user_input}'. DO NOT provide the solution. Ask One guiding question to help them find it."
 
