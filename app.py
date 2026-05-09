@@ -50,7 +50,7 @@ def get_tutor_response(user_input, current_subject, is_hint=False):
     except Exception as e:
         return f"AI Error: {e}"
 
-if prompt := st.chat_input(f"Ask your {subject_choice} question..."):
+if prompt := st.chat_input(f"Ask your {subject} question..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.write(prompt)
