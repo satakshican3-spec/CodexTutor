@@ -21,19 +21,27 @@ def get_tutor_response(user_input, is_hint=False):
         return "AI is disconnected. Please add your token."
 
     if is_hint:
-        prompt = f"Student stuck on {subject} problem: '{user_input}'. Provide a tiny, helpful hint, but DO NOT give the answer."
+        prompt = f"The student stuck on this {subject} problem: '{user_input}'. Provide a tiny, helpful hint, but DO NOT give the answer."
     else:
         prompt = f"You are CodexTutor, a Socratic {subject} tutor. The student says: '{user_input}'. DO NOT provide the solution. Ask ONE guiding question to help them find it."
 
     try:
-        response = client.text_generation(
-            prompt,
-            max_new_tokens=150,
+        response = client.chat_completion(
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=150,
             temperature=0.7
         )
-        return response
+        
+        return response.choices[0].message.content
+        
     except Exception as e:
-        return f"AI System Error: {e}"
+        
+        try:
+            temp_client = InferenceClient(model="HuggingFaceH4/zephyr-7b-beta", token=st.secrets["HF_TOKEN"])
+            resp = temp_client.chat_completion(messages=[{"role": "user", "content": prompt}], max_tokens=150)
+            return resp.choices[0].message.content
+        except:
+            return f"AI System Error: {e}. Please try again in 10 seconds."
 
 st.title("CodexTutor: AI Socratic Coach")
 
