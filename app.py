@@ -19,20 +19,21 @@ def get_tutor_response(user_input, is_hint=False):
     if "HF_TOKEN" not in st.secrets:
         return "AI is disconnected. Add your HF_TOKEN to Secrets."
 
-    prompt = f"You are CodexTutor, a Socratic {subject} tutor. User: {user_input}. "
-    if is_hint:
-        prompt += "Give a tiny, helpful hint, but DO NOT give the answer."
-    else:
-        prompt += "DO NOT give the solution. Ask ONE guiding question."
-
     try:
+        client = InferenceClient(model="mistralai/Mistral-7B-Instruct-v0.2", token=st.secrets["HF_TOKEN"])
 
-        response = client.text_generation(
-            prompt,
-            max_new_tokens=150,
-            temperature=0.7
+        if is_hint:
+            prompt = f"The student is stuck on this {subject} problem: '{user_input}'. Provide a tiny, helpful hint to nudge them forward, but DO NOT provide the answer."
+        else:
+            prompt = f"You are CodexTutor, a Socratic {subject} tutor. The student says: '{user_input}'. DO NOT provide the solution. Ask ONE guiding question to help them find it."
+
+        response = client.chat_completion(
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=150
         )
-        return response
+
+        return response.choices[0].message.content
+
     except Exception as e:
         return f"AI Error: {e}"
 
