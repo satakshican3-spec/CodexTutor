@@ -44,11 +44,15 @@ st.title("CodexTutor: AI Socratic Coach")
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.write(message["content"])
+if "messages" in st.session_state:
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.write(message["content"])
 
 if user_input := st.chat_input(f"Ask your {subject} question..."):
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
+        
     st.session_state.messages.append({"role": "user", "content": user_input})
     with st.chat_message("user"):
         st.write(user_input)
