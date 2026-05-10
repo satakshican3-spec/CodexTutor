@@ -2,6 +2,9 @@ import streamlit as st
 from huggingface_hub import InferenceClient
 import random
 
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
 st.set_page_config(page_title="CodexTutor", layout="wide")
 
 st.sidebar.title("Study Settings")
