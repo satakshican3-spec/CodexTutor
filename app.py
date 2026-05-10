@@ -29,7 +29,7 @@ def get_tutor_response(user_input, is_hint=False):
 
         response = client.text_generation(
             prompt,
-            max_new_tokens=150
+            max_new_tokens=150,
             temperature=0.7
         )
         return response
