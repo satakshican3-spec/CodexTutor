@@ -27,7 +27,12 @@ def get_tutor_response(user_input, is_hint=False):
             messages=[{"role": "user", "content": prompt}],
             max_tokens=200
         )
-        return response.choices[0].message.content
+
+        if hasattr(response.choices[0].message, "content"):
+            return response.choices[0].message.content
+        else:
+            return response.choices[0].message['content']
+            
     except Exception as e:
         return f"AI Error: {e}"
 
