@@ -12,7 +12,7 @@ subject = st.sidebar.selectbox("Subject Focus", ["Math", "Science", "History", "
 hint_requested = st.sidebar.button("Get a Hint")
 
 if "HF_TOKEN" in st.secrets:
-    client = InferenceClient(model="mistralai/Mistral-7B-Instruct-v0.2", token=st.secrets["HF_TOKEN"])
+    client = InferenceClient(model="google/gemma-2b-it", token=st.secrets["HF_TOKEN"])
 else:
     st.warning("Please add your 'HF_TOKEN' to Streamlit Secret to enable the AI.")
 
@@ -21,21 +21,17 @@ def get_tutor_response(user_input, is_hint=False):
         return "AI is disconnected. Please add your token."
 
     if is_hint:
-        prompt = f"Student stuck on {subject}: '{user_input}'. Give a tiny, helpful hint, but DO NOT give the answer."
+        prompt = f"Student stuck on {subject} problem: '{user_input}'. Provide a tiny, helpful hint, but DO NOT give the answer."
     else:
-        prompt = f"You are CodexTutor, a Socratic {subject} tutor. Student: '{user_input}'. DO NOT give the solution. Ask ONE guiding question."
+        prompt = f"You are CodexTutor, a Socratic {subject} tutor. The student says: '{user_input}'. DO NOT provide the solution. Ask ONE guiding question to help them find it."
 
     try:
-        response = client.chat_completion(
-            messages=[{"role": "user", "content": prompt}],
-            max_tokens=150
+        response = client.text_generation(
+            prompt,
+            max_new_tokens=150,
+            temperature=0.7
         )
-
-        try:
-            return response.choices[0].message.content
-        except (AttributeError, TypeError, KeyError):
-            return str(response)
-
+        return response
     except Exception as e:
         return f"AI System Error: {e}"
 
