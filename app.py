@@ -8,8 +8,10 @@ st.sidebar.title("Study Settings")
 subject = st.sidebar.selectbox("Subject Focus", ["Math", "Science", "History", "French", "Coding"])
 hint_requested = st.sidebar.button("Get a Hint")
 
-if "HF_TOKEN" in st.secrets:
-    client = InferenceClient("mistralai/Mistral-7B-Instruct-v0.3", token=st.secrets["HF_TOKEN"])
+if "HF_TOKEN" in st.session_state or "HF_TOKEN" in st.secrets:
+    token = st.secrets.get("HF_TOKEN")
+
+    client = InferenceClient(model="mistralai/Mistral-7B-Instruct-v0.3", token=token)
 else:
     st.warning("Please add your 'HF_TOKEN' to Streamlit Secrets to enable the AI.")
 
@@ -17,22 +19,20 @@ def get_tutor_response(user_input, is_hint=False):
     if "HF_TOKEN" not in st.secrets:
         return "AI is disconnected. Add your HF_TOKEN to Secrets."
 
+    prompt = f"You are CodexTutor, a Socratic {subject} tutor. User: {user_input}. "
     if is_hint:
-        prompt = f"The student is stuck on this {subject} problem: '{user_input}'. Provide a small, helpful hint, but DO NOT provide the answer."
+        prompt += "Give a tiny, helpful hint, but DO NOT give the answer."
     else:
-        prompt = f"You are CodexTutor, a Socrtic {subject} tutor. The student says: '{user_input}'. DO NOT provide the solution. Ask ONE guiding question to help them find it."
+        prompt += "DO NOT give the solution. Ask ONE guiding question."
 
     try:
-        response = client.chat_completion(
-            messages=[{"role": "user", "content": prompt}],
-            max_tokens=200
-        )
 
-        if hasattr(response.choices[0].message, "content"):
-            return response.choices[0].message.content
-        else:
-            return response.choices[0].message['content']
-            
+        response = client.text_generation(
+            prompt,
+            max_new_tokens=150
+            temperature=0.7
+        )
+        return response
     except Exception as e:
         return f"AI Error: {e}"
 
