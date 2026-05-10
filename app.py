@@ -11,37 +11,37 @@ st.sidebar.title("Study Settings")
 subject = st.sidebar.selectbox("Subject Focus", ["Math", "Science", "History", "French", "Coding"])
 hint_requested = st.sidebar.button("Get a Hint")
 
+st.sidebar.write("---")
 if "HF_TOKEN" in st.secrets:
-    client = InferenceClient(model="google/gemma-2b-it", token=st.secrets["HF_TOKEN"])
+    st.sidebar.success("System: Connected")
 else:
-    st.warning("Please add your 'HF_TOKEN' to Streamlit Secret to enable the AI.")
+    st.sidebar.error("System: Missing Token")
 
 def get_tutor_response(user_input, is_hint=False):
     if "HF_TOKEN" not in st.secrets:
-        return "AI is disconnected. Please add your token."
+        return "Please add your HF_TOKEN to Streamlit Secrets."
+
+    API_URL = "https://huggingface.co"
 
     if is_hint:
-        prompt = f"The student stuck on this {subject} problem: '{user_input}'. Provide a tiny, helpful hint, but DO NOT give the answer."
+        prompt = f"Student is stuck on {subject}: '{user_input}'. Give a tiny hint, DO NOT give the answer."
     else:
-        prompt = f"You are CodexTutor, a Socratic {subject} tutor. The student says: '{user_input}'. DO NOT provide the solution. Ask ONE guiding question to help them find it."
+        prompt = f"You are CodexTutor, a Socratic {subject} tutor. Student: '{user_input}'. DO NOT give the solution. Ask ONE guiding question."
 
     try:
-        response = client.chat_completion(
-            messages=[{"role": "user", "content": prompt}],
-            max_tokens=150,
-            temperature=0.7
+        client = InferenceClient(token=st.secrets["HF_TOKEN"])
+
+        response = client.post(
+            json={"inputs": prompt, "parameters": {"max_new_tokens": 150}},
+            model=API_URL
         )
-        
-        return response.choices[0].message.content
-        
+
+        import json
+        result = json.loads(response.decode())
+        return result[0]['generated_text'].replace(prompt, "").strip()
+
     except Exception as e:
-        
-        try:
-            temp_client = InferenceClient(model="HuggingFaceH4/zephyr-7b-beta", token=st.secrets["HF_TOKEN"])
-            resp = temp_client.chat_completion(messages=[{"role": "user", "content": prompt}], max_tokens=150)
-            return resp.choices[0].message.content
-        except:
-            return f"AI System Error: {e}. Please try again in 10 seconds."
+        return f"Connection Error: {e}. Try checking your token permissions."
 
 st.title("CodexTutor: AI Socratic Coach")
 
@@ -55,15 +55,15 @@ if user_input := st.chat_input(f"Ask your {subject} question..."):
         st.write(user_input)
 
     with st.chat_message("assistant"):
-        with st.spinner("Thinking..."):
+        with st.spinner("Consulting the Codex..."):
             response = get_tutor_response(user_input)
             st.write(response)
-            st.session_state.messages.append({"role": "assistance", "content": response})
+            st.session_state.messages.append({"role": "assistant", "content": response})
 
 if hint_requested and st.session_state.messages:
     last_user_msg = next((m["content"] for m in reversed(st.session_state.messages) if m["role"] == "user"), None)
     if last_user_msg:
-        with st.chat_message("assistance"):
+        with st.chat_message("assistant"):
             hint_text = get_tutor_response(last_user_msg, is_hint=True)
             st.info(f"HINT: {hint_text}")
             st.session_state.messages.append({"role": "assistant", "content": f"HINT: {hint_text}"})
