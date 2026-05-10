@@ -51,7 +51,7 @@ if user_input := st.chat_input(f"Ask your {subject} question..."):
         st.write(user_input)
 
     with st.chat_message("assistant"):
-        with st.spinner("Thinking...")
+        with st.spinner("Thinking..."):
             response = get_tutor_response(user_input)
             st.write(response)
             st.session_state.messages.append({"role": "assistance", "content": response})
